@@ -1,5 +1,5 @@
 # -=- coding: utf-8 -=-
-
+from decode_license import msgd
 from pyautogui import hotkey, typewrite
 from time import sleep
 from os import system, remove, path
@@ -30,6 +30,7 @@ try:
     password = config['Settings']['PassPDS']
     login = config['Settings']['LoginPDS']
     to_work = int(config['Settings']['Period'])
+    to_work_time = (config['Settings']['Time'])
     loglevel = config['Settings']['LogLevel']
 except Exception as e:
     logger.critical(str(e))
@@ -42,6 +43,7 @@ elif loglevel == '0':
 
 
 def job():
+    '''  основной блок программы  '''
     print('Программа запущена в {}'.format(datetime.now().strftime("%H:%M:%S")))
     logger.critical('Запуск программы')
     date_create = modification_date(path_dbf + 'CARDS.csv').strftime("%d.%m.%Y")
@@ -71,6 +73,7 @@ def job():
 
 
 def modification_date(file):
+    '''  проверка даты создания файла  '''
     try:
         t = path.getmtime(file)
         return datetime.fromtimestamp(t)
@@ -81,14 +84,16 @@ def modification_date(file):
 
 
 def check_date():
+    '''  сравниваем дату  '''
     cur_date = datetime.now()
-    to_date = datetime.strptime('01-02-20', '%d-%m-%y')
+    to_date = datetime.strptime(msgd, '%d-%m-%y')
     if to_date < cur_date:
         logger.critical('Bad license')
         exit()
 
 
 def stop_process():
+    '''  остановка процессов  '''
     for proc in process_iter():
         name = proc.name()
         if name == 'PCARDS.EXE' or name == 'EXCEL.EXE':
@@ -97,6 +102,7 @@ def stop_process():
 
 
 def export_in_pds(path_PDS, path_dbf, timeout_open, timeout_export, password, login):
+    '''  открываем и воодим пароли  '''
     person_card = path_PDS + 'PCARDS.EXE'
     app = Application(backend="uia").start(person_card)
     logger.debug('Успешный запуск PDS')
@@ -114,6 +120,7 @@ def export_in_pds(path_PDS, path_dbf, timeout_open, timeout_export, password, lo
 
 
 def dfb_to_csv(timeout_save):
+    '''  конвертируем файлы '''
     del_file = 'CARDS.csv'
     del_old_file(del_file)
     i = 0
@@ -147,6 +154,7 @@ def dfb_to_csv(timeout_save):
 
 
 def movement_cursors(timeout_open, timeout_export, path_dbf):
+    '''  перемещаемся внутри программы  '''
     _n = 0
     sleep(5)
     hotkey('alt')
@@ -171,6 +179,7 @@ def movement_cursors(timeout_open, timeout_export, path_dbf):
 
 
 def del_old_file(file):
+    '''  удаление старых файлов  '''
     try:
         if path.exists(file):
             remove(file)

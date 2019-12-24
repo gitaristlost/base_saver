@@ -8,7 +8,7 @@ import schedule
 
 logger = logging.getLogger('my_logger')
 logging.basicConfig(handlers=[RotatingFileHandler('export_data.log', maxBytes=2000000, backupCount=10)],
-            format=u'[%(asctime)s] %(levelname)s %(message)s')
+                    format=u'[%(asctime)s] %(levelname)s %(message)s')
 
 try:
     config = ConfigParser()
@@ -25,10 +25,13 @@ elif loglevel == '0':
 check_date()
 
 try:
-    if to_work == 00:
-        schedule.every(1).day.at('00:01').do(job)
+    if to_work == 0:
+        try:
+            schedule.every(1).day.at(to_work_time).do(job)
+        except:
+            schedule.every().day.at(to_work_time).do(job)
     else:
-        schedule.every(int(to_work)).minutes.do(job)
+        schedule.every(to_work).minutes.do(job)
 
 except:
     logger.critical('Не выбран период проверки обновления файла!')
